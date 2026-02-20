@@ -42,8 +42,12 @@ def agregar_gasto(fecha: str, categoria: str, descripcion: str, monto: float) ->
     Returns:
         Mensaje de confirmacion con los datos registrados.
     """
-    df = pd.read_csv(CSV_PATH)
-    df = pd.DataFrame(columns=CSV_COLUMNS)
+
+    try:
+        df = pd.read_csv(CSV_PATH)
+    except (FileNotFoundError, pd.errors.EmptyDataError):
+        df = pd.DataFrame(columns=CSV_COLUMNS)
+    
     nuevo_gasto = pd.DataFrame([{
         "fecha": fecha,
         "categoria": categoria.lower().strip(),
@@ -127,6 +131,8 @@ def generar_grafico_con_codigo(codigo_python: str) -> str:
         plt.close("all")
         return f"Error ejecutando el codigo: {e}"
 
+
+
 # state del agente
 
 class State(TypedDict):
@@ -158,6 +164,20 @@ def assistant(state: State):
     return {"messages": [response]}
 
 
+def parser(state: State):
+    """Revisa si el último ToolMessage viene de generar_grafico_con_codigo, 
+    guarda la ruta en ultima_imagen
+    """
+    for msg in reversed(state["messages"]):
+        if isinstance(msg, ToolMessage) and msg.name == "generar_grafico_con_codigo":
+            # El mensaje tiene formato: "Grafico generado correctamente: /ruta/al/archivo.png"
+            if "Grafico generado correctamente:" in msg.content:
+                ruta = msg.content.split("Grafico generado correctamente:")[-1].strip()
+                return {"ultima_imagen": ruta}
+            break
+    return {"ultima_imagen": None}
+
+
 # grafo ReAct
 def build_graph():
     "construye y compila grafo ReAct."
@@ -166,13 +186,15 @@ def build_graph():
 
     builder.add_node("assistant", assistant)
     builder.add_node("tools", ToolNode(tools))
+    builder.add_node("parser", parser)
 
     builder.add_edge(START, "assistant")
     builder.add_conditional_edges(
         "assistant",
         tools_condition,
     )
-    builder.add_edge("tools", "assistant")
+    builder.add_edge("tools", "parser")
+    builder.add_edge("parser", "assistant")
 
     return builder.compile()
 
@@ -181,4 +203,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    from ui import main as ui_main
+    ui_main()
