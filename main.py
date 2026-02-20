@@ -92,17 +92,40 @@ def consultar_con_codigo(codigo_python: str) -> str:
         return f"Error ejecutando el codigo: {e}"
 
 
-def generar_grafico_con_codigo():
-        """
-    Genera un grafico ejecutando codigo Python.
-
-
+def generar_grafico_con_codigo(codigo_python: str) -> str:
+    """
+    Genera un grafico ejecutando codigo Python escrito por el LLM.
     Args:
         codigo_python: Codigo Python completo que genera un grafico y lo guarda en RUTA_SALIDA.
-
+            Variables disponibles: df, pd, plt, sns, datetime, date, RUTA_SALIDA.
+            El codigo SIEMPRE debe terminar con: fig.savefig(RUTA_SALIDA, dpi=150, bbox_inches='tight')
     Returns:
         Mensaje con la ruta del archivo PNG generado, o el error si fallo la ejecucion.
     """
+    try:
+        df = pd.read_csv(CSV_PATH, parse_dates=["fecha"])
+    except (FileNotFoundError, pd.errors.EmptyDataError):
+        return "No hay gastos registrados todavía."
+    if df.empty:
+        return "No hay gastos registrados todavía."
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    ruta_salida = GRAFICOS_DIR / f"grafico_{timestamp}.png"
+    contexto = {
+        "df": df,
+        "pd": pd,
+        "plt": plt,
+        "sns": sns,
+        "datetime": datetime,
+        "date": date,
+        "RUTA_SALIDA": str(ruta_salida),
+    }
+    try:
+        exec(codigo_python, contexto)
+        plt.close("all")
+        return f"Grafico generado correctamente: {ruta_salida}"
+    except Exception as e:
+        plt.close("all")
+        return f"Error ejecutando el codigo: {e}"
 
 # state del agente
 
