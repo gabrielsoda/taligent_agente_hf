@@ -16,7 +16,7 @@ import seaborn as sns
 
 from typing import Annotated
 from typing_extensions import TypedDict
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage, ToolMessage
 from langgraph.graph import StateGraph, START
@@ -87,6 +87,7 @@ def consultar_con_codigo(codigo_python: str) -> str:
         "pd": pd,
         "datetime": datetime,
         "date": date,
+        "timedelta": timedelta, # gracias a revisar con langfuse encontré que siempre buscaba usarlo
         "resultado": "",
     }
     try:
@@ -121,6 +122,7 @@ def generar_grafico_con_codigo(codigo_python: str) -> str:
         "sns": sns,
         "datetime": datetime,
         "date": date,
+        "timedelta": timedelta,
         "RUTA_SALIDA": str(ruta_salida),
     }
     try:

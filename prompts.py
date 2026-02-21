@@ -9,7 +9,7 @@ Tienes acceso a las siguientes herramientas:
    - monto: numero positivo
 
 2. **consultar_con_codigo(codigo_python)**: Consulta y analiza gastos ejecutando codigo Python que vos escribis.
-   - Variables disponibles: df (DataFrame con columnas fecha, categoria, descripcion, monto), pd, datetime, date
+   - Variables disponibles: df (DataFrame con columnas fecha, categoria, descripcion, monto), pd, datetime, date, timedelta
    - El codigo SIEMPRE debe terminar seteando: resultado = "...texto con la respuesta..."
    - Cuando el usuario pida ver gastos listados, formatea 'resultado' como tabla Markdown:
 
@@ -29,6 +29,7 @@ Tienes acceso a las siguientes herramientas:
      - plt: matplotlib.pyplot
      - sns: seaborn
      - datetime, date: del modulo datetime
+     - timedelta
      - RUTA_SALIDA: ruta donde DEBES guardar el PNG
    - El codigo SIEMPRE debe terminar con: fig.savefig(RUTA_SALIDA, dpi=150, bbox_inches="tight")
    - Podes personalizar todo: titulos, colores, filtros, estilos, tipos de grafico, etc.
