@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()  # Se ejecuta aquí, una sola vez
 
+import logging
+logging.getLogger("opentelemetry").setLevel(logging.CRITICAL)
+
 # Rutas
 BASE_DIR = Path(__file__).resolve().parent
 CSV_PATH = BASE_DIR / "gastos.csv"

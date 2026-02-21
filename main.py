@@ -128,7 +128,10 @@ def generar_grafico_con_codigo(codigo_python: str) -> str:
     try:
         exec(codigo_python, contexto, contexto)
         plt.close("all")
-        return f"Grafico generado correctamente: {ruta_salida}"
+        if ruta_salida.exists():
+            return f"Grafico generado correctamente: {ruta_salida}"
+        else:
+            return "El codigo se ejecuto sin errores pero no se genero el archivo PNG. Asegurate de usar fig.savefig(RUTA_SALIDA, dpi=150, bbox_inches='tight')"
     except Exception as e:
         plt.close("all")
         return f"Error ejecutando el codigo: {e}"
