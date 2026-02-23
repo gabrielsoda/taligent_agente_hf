@@ -1,12 +1,6 @@
 # RICHARD - Agente de finanzas personales
 
-_**R**eceptor de 
-**I**nformación de 
-**C**onsumos 
-**H**umanos para 
-**A**dministración y 
-**R**egistro del 
-**D**inero_
+_**R**eceptor de **I**nformación de **C**onsumos **H**umanos para **A**dministración y **R**egistro del **D**inero_
 
 ---
 
