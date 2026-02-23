@@ -16,6 +16,12 @@ El sistema se integra con **Langfuse** para observabilidad y trazabilidad de las
 
 **Stack:** Python 3.12, LangGraph, LangChain, Google Gemini 2.5 Flash, Pandas, Matplotlib, Seaborn, Rich, Langfuse.
 
+## Arquitectura ReAct del Agente
+
+![Grafo del agente con el ciclo Thought - Action - Observation](doc_images/grafo_agente.png)
+
+---
+
 *Nota:* Existe la intensión de agregar las siguientes features en el futuro:
 
 | **Migración de CSV a SQLite** | Reemplazar el almacenamiento CSV por una base **SQLite**. Mejora rendimiento, concurrencia, y habilita queries complejas nativas. Especialmente relevante si se escala a multiples usuarios (Telegram).                                                                                                        |
