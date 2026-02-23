@@ -13,7 +13,7 @@ console = Console()
 def print_welcome():
     welcome = Text()
     welcome.append("Asistente de Gastos Financieros\n", style="bold cyan")
-    welcome.append("LangGraph + Gemini\n\n", style="dim")
+    welcome.append("LangGraph + Gemini + LangFuse\n\n", style="dim")
     welcome.append("Puedo ayudarte a:\n", style="bold white")
     welcome.append("  • Registrar tus gastos\n", style="green")
     welcome.append("  • Consultar cuánto gastaste\n", style="green")
