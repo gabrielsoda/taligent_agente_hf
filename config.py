@@ -16,6 +16,8 @@ GRAFICOS_DIR.mkdir(exist_ok=True)
 
 # Columnas del CSV
 CSV_COLUMNS = ["fecha", "categoria", "descripcion", "monto"]
+CATEGORIAS_VALIDAS = ["comida", "transporte", "servicios", "entretenimiento", 
+                      "salud", "educación", "deporte", "otros"]
 
 # API Keys
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")

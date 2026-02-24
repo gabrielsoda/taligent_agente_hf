@@ -23,9 +23,21 @@ from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from config import CSV_PATH, CSV_COLUMNS, GRAFICOS_DIR
+from config import CSV_PATH, CSV_COLUMNS, GRAFICOS_DIR, CATEGORIAS_VALIDAS
 from prompts import SYSTEM_PROMPT
 
+
+def _load_gastos(parse_dates: bool = True) -> pd.DataFrame | None:
+    """Lee el CSV de gastos. Retorna el DataFrame o None si no existe o está vacío"""
+    try:
+        kwargs = {"parse_dates": ["fecha"]} if parse_dates else {}
+        df = pd.read_csv(CSV_PATH, **kwargs)
+        if df.empty:
+            return None
+        return df
+    except (FileNotFoundError, pd.errors.EmptyDataError):
+        return None
+    
 
 
 
@@ -36,16 +48,32 @@ def agregar_gasto(fecha: str, categoria: str, descripcion: str, monto: float) ->
     Args:
         fecha: Fecha del gasto en formato YYYY-MM-DD (ejemplo: 2026-02-15).
         categoria: Categoria del gasto (ejemplo: comida, transporte, servicios, entretenimiento, salud, educacion, deporte, otros).
-        descripcion: Descripcion breve del gasto (ejemplo: almuerzo en restaurante).
-        monto: Monto del gasto en valor numerico (ejemplo: 50.00).
+        descripcion: Descripción breve del gasto (ejemplo: almuerzo en restaurante).
+        monto: Monto del gasto en valor numérico (ejemplo: 50.00).
 
     Returns:
-        Mensaje de confirmacion con los datos registrados.
+        Mensaje de confirmación con los datos registrados.
     """
-
+    #validar fecha
     try:
-        df = pd.read_csv(CSV_PATH)
-    except (FileNotFoundError, pd.errors.EmptyDataError):
+        datetime.strptime(fecha, "%Y-%m-%d")
+    except ValueError:
+        return f"Error: La fecha '{fecha}' no tiene formato válido (YYYY-MM-DD)."
+    # validar categoría
+    cat = categoria.lower().strip()
+    if cat not in CATEGORIAS_VALIDAS:
+        return (
+            f"Error: La categoría '{categoria}' no es válida. "
+            f"Opciones: {', '.join(CATEGORIAS_VALIDAS)}"
+        )
+    #validar monto
+    if monto <= 0:
+        return f"Error: El monto debe ser positivo, se recibió {monto}."
+    
+    
+    # Cargar o crear DataFrame
+    df = _load_gastos(parse_dates=False)
+    if df is None:
         df = pd.DataFrame(columns=CSV_COLUMNS)
     
     nuevo_gasto = pd.DataFrame([{
