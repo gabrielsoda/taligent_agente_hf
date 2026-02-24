@@ -120,7 +120,7 @@ def consultar_con_codigo(codigo_python: str) -> str:
     Args:
         codigo_python: Código Python que analiza el DataFrame y setea la variable 'resultado'
             con un string descriptivo de la respuesta.
-            Variables disponibles: df, pd, datetime, date.
+            Variables disponibles: df, pd, datetime, date, timedelta.
             El código SIEMPRE debe terminar seteando: resultado = "...texto con la respuesta..."
     Returns:
         El valor de la variable 'resultado' seteada por el codigo, o el error si fallo.
@@ -140,7 +140,7 @@ def generar_grafico_con_codigo(codigo_python: str) -> str:
     Genera un grafico ejecutando codigo Python escrito por el LLM.
     Args:
         codigo_python: Codigo Python completo que genera un grafico y lo guarda en RUTA_SALIDA.
-            Variables disponibles: df, pd, plt, sns, datetime, date, RUTA_SALIDA.
+            Variables disponibles: df, pd, plt, sns, datetime, date, timedelta, RUTA_SALIDA.
             El codigo SIEMPRE debe terminar con: fig.savefig(RUTA_SALIDA, dpi=150, bbox_inches='tight')
     Returns:
         Mensaje con la ruta del archivo PNG generado, o el error si fallo la ejecucion.
