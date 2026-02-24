@@ -38,7 +38,28 @@ def _load_gastos(parse_dates: bool = True) -> pd.DataFrame | None:
     except (FileNotFoundError, pd.errors.EmptyDataError):
         return None
     
-
+def _execute_llm_code(code: str, df: pd.DataFrame, extra_context: dict | None = None) -> dict:
+    """Ejecuta código Python generado por el LLM en un contexto controlado.
+    Returns:
+        dict con claves:
+            - "ok": bool
+            - "context": dict con el contexto post-ejecución
+            - "error": str | None
+    """
+    contexto = {
+        "pd": pd,
+        "df": df,
+        "date": date,
+        "datetime": datetime,
+        "timedelta": timedelta,
+    }
+    if extra_context:
+        contexto.update(extra_context)
+    try:
+        exec(code, contexto, contexto)
+        return {"ok": True, "context": contexto, "error": None}
+    except Exception as e:
+        return {"ok": False, "context": contexto, "error": str(e)}
 
 
 def agregar_gasto(fecha: str, categoria: str, descripcion: str, monto: float) -> str:
@@ -95,34 +116,23 @@ def agregar_gasto(fecha: str, categoria: str, descripcion: str, monto: float) ->
 
 def consultar_con_codigo(codigo_python: str) -> str:
     """
-    Consulta y analiza los gastos ejecutando codigo Python escrito por el LLM.
+    Consulta y analiza los gastos ejecutando código Python escrito por el LLM.
     Args:
-        codigo_python: Codigo Python que analiza el DataFrame y setea la variable 'resultado'
+        codigo_python: Código Python que analiza el DataFrame y setea la variable 'resultado'
             con un string descriptivo de la respuesta.
             Variables disponibles: df, pd, datetime, date.
-            El codigo SIEMPRE debe terminar seteando: resultado = "...texto con la respuesta..."
+            El código SIEMPRE debe terminar seteando: resultado = "...texto con la respuesta..."
     Returns:
         El valor de la variable 'resultado' seteada por el codigo, o el error si fallo.
     """
-    try:
-        df = pd.read_csv(CSV_PATH, parse_dates=["fecha"])
-    except (FileNotFoundError, pd.errors.EmptyDataError):
-        return "No hay gastos registrados todavia."
-    if df.empty:
-        return "No hay gastos registrados todavia."
-    contexto = {
-        "df": df,
-        "pd": pd,
-        "datetime": datetime,
-        "date": date,
-        "timedelta": timedelta, # gracias a revisar con langfuse encontré que siempre buscaba usarlo
-        "resultado": "",
-    }
-    try:
-        exec(codigo_python, contexto, contexto)
-        return str(contexto.get("resultado", "El codigo no seteó la variable 'resultado'."))
-    except Exception as e:
-        return f"Error ejecutando el codigo: {e}"
+    df = _load_gastos()
+    if df is None:
+        return "No hay gastos registrados todavía."
+    
+    result = _execute_llm_code(codigo_python, df, extra_context={"resultado": ""})
+    if not result["ok"]:
+        return f"Error ejecutando el codigo: {result['error']}"
+    return str(result["context"].get("resultado", "El código no seteó la variable 'resultado'."))
 
 
 def generar_grafico_con_codigo(codigo_python: str) -> str:
@@ -135,34 +145,25 @@ def generar_grafico_con_codigo(codigo_python: str) -> str:
     Returns:
         Mensaje con la ruta del archivo PNG generado, o el error si fallo la ejecucion.
     """
-    try:
-        df = pd.read_csv(CSV_PATH, parse_dates=["fecha"])
-    except (FileNotFoundError, pd.errors.EmptyDataError):
+    df = _load_gastos()
+    if df is None:
         return "No hay gastos registrados todavía."
-    if df.empty:
-        return "No hay gastos registrados todavía."
+    
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     ruta_salida = GRAFICOS_DIR / f"grafico_{timestamp}.png"
-    contexto = {
-        "df": df,
-        "pd": pd,
-        "plt": plt,
-        "sns": sns,
-        "datetime": datetime,
-        "date": date,
-        "timedelta": timedelta,
-        "RUTA_SALIDA": str(ruta_salida),
-    }
-    try:
-        exec(codigo_python, contexto, contexto)
-        plt.close("all")
-        if ruta_salida.exists():
-            return f"Grafico generado correctamente: {ruta_salida}"
-        else:
-            return "El codigo se ejecuto sin errores pero no se genero el archivo PNG. Asegurate de usar fig.savefig(RUTA_SALIDA, dpi=150, bbox_inches='tight')"
-    except Exception as e:
-        plt.close("all")
-        return f"Error ejecutando el codigo: {e}"
+
+    result = _execute_llm_code(codigo_python, df, extra_context={"plt": plt, 
+                                                                 "sns": sns, 
+                                                                 "RUTA_SALIDA": str(ruta_salida)})
+    plt.close("all")
+    if not result["ok"]:
+        return f"Error ejecutando el codigo: {result['error']}"
+    if ruta_salida.exists():
+        return f"Gráfico generado correctamente: {ruta_salida}"
+    return (
+        "El codigo se ejecuto sin errores pero no se genero el archivo PNG. "
+        "Asegurate de usar fig.savefig(RUTA_SALIDA, dpi=150, bbox_inches='tight')"
+    )
 
 
 
