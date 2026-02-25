@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()  # Se ejecuta aquí, una sola vez
+load_dotenv()
 
 import logging
 
