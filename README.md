@@ -18,7 +18,7 @@ El sistema se integra con **Langfuse** para observabilidad y trazabilidad de las
 
 ## Arquitectura ReAct del Agente
 
-![Grafo del agente con el ciclo Thought - Action - Observation](doc_images/grafo_agente.png)
+![Grafo del agente con el ciclo Thought - Action - Observation](docs/grafo_agente.png)
 
 ---
 
